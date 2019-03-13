@@ -9,6 +9,10 @@ public class Client {
     private PrintWriter writer;
     private BufferedReader reader;
 
+    public static void main(String[] args) {
+
+    }
+
     public void startConnection(String host, int port) throws IOException {
         clientSocket = new Socket(host, port);
 
@@ -16,6 +20,12 @@ public class Client {
         //not kept in the buffer waiting for other data to arrive and accumulate.
         writer = new PrintWriter(clientSocket.getOutputStream(), true);
         reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+    }
+
+    public String sendMessage(String msg) throws IOException{
+        writer.println(msg);
+        String resp = reader.readLine();
+        return resp;
     }
 
     public void endConnection() throws IOException{
