@@ -47,9 +47,6 @@ public class Server {
 
         }
 
-
-//        closeServer();
-
     }
 
     public void closeServer() throws IOException{

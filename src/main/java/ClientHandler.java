@@ -25,7 +25,6 @@ public class ClientHandler implements Runnable {
         }
 
 
-
         if ("/".equals(inputLine)) {
             writer.println(HTTPResponses.HTTP_OK.toString());
         }
@@ -35,8 +34,11 @@ public class ClientHandler implements Runnable {
                 writer.println(HTTPResponses.HTTP_NOT_FOUND.toString());
             }
         }
+        
         try{
             clientSocket.close();
+            writer.close();
+            reader.close();
         }
         catch (IOException e){
             System.out.println("Error when trying to get close client");
