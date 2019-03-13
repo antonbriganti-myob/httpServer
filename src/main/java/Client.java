@@ -9,9 +9,6 @@ public class Client {
     private PrintWriter writer;
     private BufferedReader reader;
 
-    public static void main(String[] args) {
-
-    }
 
     public void startConnection(String host, int port) throws IOException {
         clientSocket = new Socket(host, port);
