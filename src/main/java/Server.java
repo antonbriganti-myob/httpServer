@@ -2,15 +2,18 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
     private ServerSocket serverSocket;
-    private Socket clientSocket;
     private File fileDirectory;
-    private PrintWriter writer;
-    private BufferedReader reader;
+    private ExecutorService executor = Executors.newFixedThreadPool(10);
 
-    public void startServer(int port, String fileDir) throws IOException{
+    public Server() {
+    }
+
+    public void startServer(int port, String fileDir){
         if (port < 0 || port > 65535){
             System.out.println("Error, port number is out range (0-65535, inclusive)");
         }
@@ -20,25 +23,36 @@ public class Server {
             System.out.println("Error, not a valid file directory");
             return;
         }
-        InetAddress addr = InetAddress.getByName("127.0.0.1");
-        serverSocket = new ServerSocket(port,0, addr);
-        System.out.println("waiting for client");
-        clientSocket = serverSocket.accept();
-        System.out.println("client found");
+
+        try {
+            InetAddress addr = InetAddress.getByName("127.0.0.1");
+            serverSocket = new ServerSocket(port,0, addr);
+        }
+        catch (IOException e){
+            System.out.println("Failure to start server on port " + (port));
+        }
 
 
-        // writer writes to the output stream of the socket (which is actually for input)
-        writer = new PrintWriter(clientSocket.getOutputStream(), true);
-        reader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        while(true){
+            try{
+                System.out.println("waiting for client");
+                Socket incomingClient = serverSocket.accept();
+                executor.submit(new ClientHandler(incomingClient));
+
+                System.out.println("client found");
+            }
+            catch (IOException e){
+                System.out.println("Socket failed to connect");
+            }
+
+        }
 
 
+//        closeServer();
 
     }
 
     public void closeServer() throws IOException{
-        writer.close();
-        reader.close();
-        clientSocket.close();
         serverSocket.close();
 
     }

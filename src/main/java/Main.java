@@ -20,23 +20,12 @@ public class Main {
 
 
         Server server = new Server();
-        Client client = new Client();
-        portNumber = 6666;
+        portNumber = 5000;
         fileDirectory = "/Users/anton.briganti/Documents/titan cat";
 
 
-        try{
-            System.out.println("starting server");
-            server.startServer(portNumber, fileDirectory);
-
-            System.out.println("starting client");
-            client.startConnection("127.0.0.1", portNumber);
-            ;
-
-        }
-        catch (IOException e){
-            System.out.println("Oops something went wrong!");
-        }
+        System.out.println("starting server");
+        server.startServer(portNumber, fileDirectory);
 
     }
 
