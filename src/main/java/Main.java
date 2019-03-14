@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import org.apache.commons.cli.*;
 
@@ -21,7 +22,7 @@ public class Main {
 
         Server server = new Server();
         portNumber = 5000;
-        fileDirectory = "/Users/anton.briganti/Documents/titan cat";
+        fileDirectory = "/Users/anton.briganti/Documents/Development/httpServerApplication/cob_spec/public";
 
 
         System.out.println("starting server");

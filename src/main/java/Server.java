@@ -1,3 +1,6 @@
+import reader.ReaderBufferedReader;
+import socket.StandardSocket;
+
 import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -37,12 +40,13 @@ public class Server {
             try{
                 System.out.println("waiting for client");
                 Socket incomingClient = serverSocket.accept();
-                executor.submit(new ClientHandler(incomingClient));
-
+                ReaderBufferedReader reader = new ReaderBufferedReader(incomingClient);
+                StandardSocket socket = new StandardSocket(incomingClient);
+                executor.submit(new ClientHandler(socket, reader));
                 System.out.println("client found");
             }
             catch (IOException e){
-                System.out.println("Socket failed to connect");
+                System.out.println("StandardSocket failed to connect");
             }
 
         }
