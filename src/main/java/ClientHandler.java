@@ -22,9 +22,9 @@ public class ClientHandler implements Runnable {
     public void run(){
 
         String requestLine = getRequestLine();
-        System.out.println(requestLine);
+//        System.out.println(requestLine);
 
-//        Map<String, String> headers = getHeaders();
+        Map<String, String> headers = getHeaders();
 //        System.out.println(headers.keySet());
 //        System.out.println(headers.values());
 //
@@ -55,22 +55,16 @@ public class ClientHandler implements Runnable {
     public Map<String, String> getHeaders() {
         String input;
         HashMap<String, String> headers = new HashMap<>();
-        int i = -1;
 
         try{
-            while (true){
-                i++;
-                input = reader.readLine();
-                System.out.println((i) + input);
+            while ((!(input=reader.readLine()).isEmpty())){
                 headers.put(input.split(": ")[0], input.split(": ")[1]);
-//                System.out.println("headers updated");
             }
         }
         catch (IOException e){
-            System.out.println("Oops");
+            System.out.println("Error, ill formed headers received");
         }
 
-        System.out.println("outta here");
         return headers;
     }
 

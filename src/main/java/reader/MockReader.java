@@ -13,6 +13,7 @@ public class MockReader implements ReaderInterface {
     public String readLine() {
         currentLine++;
         try {
+
             return readLineResponse.split("\n")[currentLine];
         }
         catch (IndexOutOfBoundsException e){

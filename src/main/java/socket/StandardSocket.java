@@ -1,6 +1,7 @@
 package socket;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
@@ -18,7 +19,14 @@ public class StandardSocket implements SocketInterface {
     }
 
     @Override
+    public InputStream getInputStream() throws IOException{
+        return this.socket.getInputStream();
+    }
+
+    @Override
     public void close() throws IOException {
         this.socket.close();
     }
+
+
 }
