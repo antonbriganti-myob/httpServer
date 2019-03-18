@@ -44,6 +44,7 @@ public class Server {
                 ReaderBufferedReader reader = new ReaderBufferedReader(incomingClient);
                 WriterPrintWriter writer = new WriterPrintWriter(incomingClient);
 
+
                 executor.submit(new ClientHandler(incomingClient, reader, writer, fileDirectory));
                 System.out.println("client found");
             }

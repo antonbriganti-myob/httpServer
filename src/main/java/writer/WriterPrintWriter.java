@@ -9,6 +9,7 @@ public class WriterPrintWriter implements WriterInterface {
     private PrintWriter writer;
 
     public WriterPrintWriter(SocketInterface socket) throws IOException {
+        // writer writes to the output stream of the socket (which is actually for input)
         this.writer = new PrintWriter(socket.getOutputStream(), true);
     }
 

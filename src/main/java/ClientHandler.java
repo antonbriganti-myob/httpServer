@@ -16,7 +16,6 @@ public class ClientHandler implements Runnable {
 
     public ClientHandler(SocketInterface socket, ReaderInterface reader, WriterInterface writer, File fileDirectory) {
         this.clientSocket = socket;
-        // writer writes to the output stream of the socket (which is actually for input)
         this.writer = writer;
         this.reader = reader;
         this.fileDirectory = fileDirectory;
