@@ -1,5 +1,3 @@
-import java.util.Map;
-
 public class HTTPMessage {
     HTTPStatusCodes statusCode;
 //    Map<String, String> headers;

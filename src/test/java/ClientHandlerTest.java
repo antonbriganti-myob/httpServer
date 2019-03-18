@@ -2,7 +2,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import reader.MockReader;
 import socket.MockSocket;
+import writer.MockWriter;
 
+import java.io.File;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
@@ -13,13 +15,15 @@ class ClientHandlerTest {
 
     private MockReader reader;
     private MockSocket socket;
+    private MockWriter writer;
     private ClientHandler handler;
 
     @BeforeEach
     void setup() {
         reader = new MockReader();
         socket = new MockSocket();
-        handler = new ClientHandler(socket, reader);
+        writer = new MockWriter();
+        handler = new ClientHandler(socket, reader, writer, new File("file"));
     }
 
     @Test

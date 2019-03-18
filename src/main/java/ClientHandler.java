@@ -31,15 +31,9 @@ public class ClientHandler implements Runnable {
         Map<String, String> headers = getHeaders();
         System.out.println("Headers: " + Arrays.toString(headers.entrySet().toArray()));
 
-        HTTPMessage response = processMessage(requestLine);
+        HTTPMessage response = processRequest(requestLine);
 
-        try {
-            System.out.println(response.toString());
-            writer.println(response.toString());
-        } catch (IOException e) {
-            System.out.println("Error when trying to write response to client");
-        }
-
+        sendResponseToClient(response);
 
         try{
             closeSocket();
@@ -48,6 +42,14 @@ public class ClientHandler implements Runnable {
             System.out.println("Error when trying to get close client");
         }
 
+    }
+
+    private void sendResponseToClient(HTTPMessage response) {
+        try {
+            writer.println(response.toString());
+        } catch (IOException e) {
+            System.out.println("Error when trying to write response to client");
+        }
     }
 
     public String getRequestLine() {
@@ -59,16 +61,21 @@ public class ClientHandler implements Runnable {
         catch (IOException e){
             System.out.println("Error when trying to get input from client");
         }
+
         return inputLine;
     }
 
     public Map<String, String> getHeaders() {
         String input;
+        String key;
+        String value;
         HashMap<String, String> headers = new HashMap<>();
 
         try{
             while ((!(input=reader.readLine()).isEmpty())){
-                headers.put(input.split(": ")[0], input.split(": ")[1]);
+                key = input.split(": ")[0];
+                value = input.split(": ")[1];
+                headers.put(key, value);
             }
         }
         catch (IOException e){
@@ -78,14 +85,13 @@ public class ClientHandler implements Runnable {
         return headers;
     }
 
-    private HTTPMessage processMessage(String inputLine) {
+    private HTTPMessage processRequest(String inputLine) {
         File requestedFile;
         HTTPMessage response;
 
         HTTPMethods requestMethod = HTTPMethods.valueOf(inputLine.split(" ")[0]);
         String requestedResource = inputLine.split(" ")[1];
         requestedFile = new File(fileDirectory, requestedResource);
-        System.out.println(requestedFile.getName());
 
         switch(requestMethod){
             case HEAD:
