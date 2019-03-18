@@ -14,7 +14,7 @@ class ServerTest {
         client.startConnection(ipAddress, portNumber);
         String response = client.sendMessage("/");
         client.endConnection();
-        assertEquals(response, HTTPResponses.HTTP_OK.toString());
+        assertEquals(response, HTTPStatusCodes.HTTP_OK.toString());
     }
 
     @Test
@@ -25,7 +25,7 @@ class ServerTest {
         client.startConnection(ipAddress, portNumber);
         String response = client.sendMessage("/no_file_here.txt");
         client.endConnection();
-        assertEquals(response, HTTPResponses.HTTP_NOT_FOUND.toString());
+        assertEquals(response, HTTPStatusCodes.HTTP_NOT_FOUND.toString());
     }
 
     @Test

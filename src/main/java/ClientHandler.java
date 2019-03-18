@@ -1,35 +1,45 @@
 import reader.ReaderInterface;
 import socket.SocketInterface;
+import writer.WriterInterface;
 
 import java.io.*;
-import java.net.Socket;
+import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ClientHandler implements Runnable {
     private SocketInterface clientSocket;
-//    private PrintWriter writer;
+    private WriterInterface writer;
     private ReaderInterface reader;
+    private File fileDirectory;
 
-    public ClientHandler(SocketInterface socket, ReaderInterface reader) {
+    public ClientHandler(SocketInterface socket, ReaderInterface reader, WriterInterface writer, File fileDirectory) {
         this.clientSocket = socket;
         // writer writes to the output stream of the socket (which is actually for input)
-//        writer = new PrintWriter(clientSocket.getOutputStream(), true);
+        this.writer = writer;
         this.reader = reader;
+        this.fileDirectory = fileDirectory;
     }
 
     @Override
     public void run(){
 
         String requestLine = getRequestLine();
-//        System.out.println(requestLine);
+        System.out.println("Request Line: " + requestLine);
 
         Map<String, String> headers = getHeaders();
-//        System.out.println(headers.keySet());
-//        System.out.println(headers.values());
-//
-//        HTTPResponses response = processMessage(inputLine);
-//        writer.println(response);
+        System.out.println("Headers: " + Arrays.toString(headers.entrySet().toArray()));
+
+        HTTPMessage response = processMessage(requestLine);
+
+        try {
+            System.out.println(response.toString());
+            writer.println(response.toString());
+        } catch (IOException e) {
+            System.out.println("Error when trying to write response to client");
+        }
+
 
         try{
             closeSocket();
@@ -68,21 +78,53 @@ public class ClientHandler implements Runnable {
         return headers;
     }
 
-    private HTTPResponses processMessage(String inputLine) {
+    private HTTPMessage processMessage(String inputLine) {
         File requestedFile;
-        HTTPResponses response;
+        HTTPMessage response;
 
-        if ("/".equals(inputLine)) {
-            response = HTTPResponses.HTTP_OK;
+        HTTPMethods requestMethod = HTTPMethods.valueOf(inputLine.split(" ")[0]);
+        String requestedResource = inputLine.split(" ")[1];
+        requestedFile = new File(fileDirectory, requestedResource);
+        System.out.println(requestedFile.getName());
+
+        switch(requestMethod){
+            case HEAD:
+                response = performHEADRequest(requestedFile);
+                break;
+            case GET:
+                try {
+                    response = performGETRequest(requestedFile);
+                    break;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            default:
+                response = new HTTPMessage(HTTPStatusCodes.HTTP_NOT_IMPLEMENTED);
+        }
+
+
+        return response;
+    }
+
+    private HTTPMessage performHEADRequest(File requestedFile) {
+        HTTPStatusCodes statusCode;
+        statusCode =  (requestedFile.exists()) ? HTTPStatusCodes.HTTP_OK : HTTPStatusCodes.HTTP_NOT_FOUND;
+        return new HTTPMessage(statusCode);
+    }
+
+    private HTTPMessage performGETRequest(File requestedFile) throws IOException {
+        HTTPStatusCodes statusCode;
+        String fileContents;
+        HTTPMessage response;
+
+        if (requestedFile.exists()){
+            statusCode = HTTPStatusCodes.HTTP_OK;
+            fileContents = new String(Files.readAllBytes(requestedFile.toPath()));
+            response = new HTTPMessage(statusCode, fileContents);
         }
         else{
-            requestedFile = new File(inputLine);
-            if (!requestedFile.exists()){
-                response = HTTPResponses.HTTP_NOT_FOUND;
-            }
-            else {
-                response = HTTPResponses.HTTP_NOT_IMPLEMENTED;
-            }
+            statusCode = HTTPStatusCodes.HTTP_NOT_FOUND;
+            response = new HTTPMessage(statusCode);
         }
 
         return response;
@@ -90,7 +132,7 @@ public class ClientHandler implements Runnable {
 
     private void closeSocket() throws IOException {
         clientSocket.close();
-//        writer.close();
+        writer.close();
         reader.close();
     }
 }

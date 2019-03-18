@@ -1,5 +1,6 @@
 import reader.ReaderBufferedReader;
 import socket.StandardSocket;
+import writer.WriterPrintWriter;
 
 import java.io.*;
 import java.net.InetAddress;
@@ -39,10 +40,11 @@ public class Server {
         while(true){
             try{
                 System.out.println("waiting for client");
-                Socket incomingClient = serverSocket.accept();
+                StandardSocket incomingClient = new StandardSocket(serverSocket.accept());
                 ReaderBufferedReader reader = new ReaderBufferedReader(incomingClient);
-                StandardSocket socket = new StandardSocket(incomingClient);
-                executor.submit(new ClientHandler(socket, reader));
+                WriterPrintWriter writer = new WriterPrintWriter(incomingClient);
+
+                executor.submit(new ClientHandler(incomingClient, reader, writer, fileDirectory));
                 System.out.println("client found");
             }
             catch (IOException e){
