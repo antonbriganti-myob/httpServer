@@ -6,10 +6,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 
 public class WriterPrintWriter implements WriterInterface {
-    PrintWriter writer;
+    private PrintWriter writer;
 
     public WriterPrintWriter(SocketInterface socket) throws IOException {
-        this.writer = new PrintWriter(socket.getOutputStream());
+        this.writer = new PrintWriter(socket.getOutputStream(), true);
     }
 
 
