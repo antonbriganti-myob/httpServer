@@ -40,12 +40,12 @@ public class Server {
         while(true){
             try{
                 System.out.println("waiting for client");
-                StandardSocket incomingClient = new StandardSocket(serverSocket.accept());
-                ReaderBufferedReader reader = new ReaderBufferedReader(incomingClient);
-                WriterPrintWriter writer = new WriterPrintWriter(incomingClient);
+                Socket incomingClient = serverSocket.accept();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(incomingClient.getInputStream()));
+//                WriterPrintWriter writer = new WriterPrintWriter(incomingClient);
 
 
-                executor.submit(new ClientHandler(incomingClient, reader, writer, fileDirectory));
+                executor.submit(new ClientHandler(incomingClient, reader, fileDirectory));
                 System.out.println("client found");
             }
             catch (IOException e){

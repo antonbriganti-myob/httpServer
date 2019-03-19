@@ -1,22 +1,21 @@
 import reader.ReaderInterface;
-import socket.SocketInterface;
-import writer.WriterInterface;
 
 import java.io.*;
+import java.net.Socket;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ClientHandler implements Runnable {
-    private SocketInterface clientSocket;
-    private WriterInterface writer;
-    private ReaderInterface reader;
+    private Socket clientSocket;
+    private PrintWriter writer;
+    private BufferedReader reader;
     private File fileDirectory;
 
-    public ClientHandler(SocketInterface socket, ReaderInterface reader, WriterInterface writer, File fileDirectory) {
+    public ClientHandler(Socket socket, BufferedReader reader, File fileDirectory) throws IOException {
         this.clientSocket = socket;
-        this.writer = writer;
+        this.writer = new PrintWriter(socket.getOutputStream());
         this.reader = reader;
         this.fileDirectory = fileDirectory;
     }
@@ -43,12 +42,8 @@ public class ClientHandler implements Runnable {
 
     }
 
-    private void sendResponseToClient(HTTPMessage response) {
-        try {
-            writer.println(response.toString());
-        } catch (IOException e) {
-            System.out.println("Error when trying to write response to client");
-        }
+    public void sendResponseToClient(HTTPMessage response) {
+        writer.println(response.toString());
     }
 
     public String getRequestLine() {
