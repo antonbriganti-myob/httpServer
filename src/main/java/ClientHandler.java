@@ -1,21 +1,27 @@
-import reader.ReaderInterface;
-
-import java.io.*;
-import java.net.Socket;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
 public class ClientHandler implements Runnable {
-    private Socket clientSocket;
     private PrintWriter writer;
     private BufferedReader reader;
     private File fileDirectory;
 
-    public ClientHandler(Socket socket, BufferedReader reader, File fileDirectory) throws IOException {
-        this.clientSocket = socket;
-        this.writer = new PrintWriter(socket.getOutputStream());
+    /*
+    Changes the constructor to have the writer initialised outside, and injected in.
+
+    It is can be important to structure your code to support testability, in this case
+    the class is more testable by having the outside interface changed. This way we
+    can inject a Mock for testing, and actual implementation for Production. This is
+    the same approach as the Interfaces we created previously.
+     */
+    public ClientHandler(PrintWriter writer, BufferedReader reader, File fileDirectory) throws IOException {
+        this.writer = writer;
         this.reader = reader;
         this.fileDirectory = fileDirectory;
     }
@@ -131,7 +137,8 @@ public class ClientHandler implements Runnable {
     }
 
     private void closeSocket() throws IOException {
-        clientSocket.close();
+        // The socket is closed in in Server.closeSocket(), which would need to be called elsewhere.
+        // The socket will be implicitly closed when the JVM shuts down also.
         writer.close();
         reader.close();
     }

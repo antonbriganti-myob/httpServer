@@ -1,8 +1,8 @@
-import reader.ReaderBufferedReader;
-import socket.StandardSocket;
-import writer.WriterPrintWriter;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -43,9 +43,10 @@ public class Server {
                 Socket incomingClient = serverSocket.accept();
                 BufferedReader reader = new BufferedReader(new InputStreamReader(incomingClient.getInputStream()));
 //                WriterPrintWriter writer = new WriterPrintWriter(incomingClient);
+                PrintWriter writer = new PrintWriter(incomingClient.getOutputStream());
 
 
-                executor.submit(new ClientHandler(incomingClient, reader, fileDirectory));
+                executor.submit(new ClientHandler(writer, reader, fileDirectory));
                 System.out.println("client found");
             }
             catch (IOException e){

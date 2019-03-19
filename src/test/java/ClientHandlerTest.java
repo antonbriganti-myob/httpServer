@@ -1,36 +1,41 @@
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import reader.MockReader;
-import socket.MockSocket;
-import writer.MockWriter;
 
-import java.io.*;
-import java.net.Socket;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
-import static org.mockito.Mockito.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 
 class ClientHandlerTest {
 
+    /*
+     We setup the Mock objects to fence off the functionality we want to test. In this case
+     we are interested in testing the ClientHandler, so all else should be mocked/stubbed.
+
+     Mock = empty implementation of the Class, to facilitate
+     Stub = Functional implementation, setup to facilitate testing
+      */
+
+    @Mock
+    private PrintWriter writer;
     @Mock
     private BufferedReader reader;
-    @Mock
-    private Socket socket;
     private ClientHandler handler;
 
     @BeforeEach
     void setup() throws IOException {
-//        reader = new MockReader();
-        socket = mock(Socket.class);
-        Socket outSocket = mock(Socket.class);
+        writer = mock(PrintWriter.class);
         reader = mock(BufferedReader.class);
-        when(socket.getOutputStream()).thenReturn(outSocket);
-//        writer = new MockWriter();
         String fileDirectory = "/Users/anton.briganti/Documents/Development/httpServerApplication/cob_spec/public";
-        handler = new ClientHandler(socket, reader, new File(fileDirectory));
+        handler = new ClientHandler(writer, reader, new File(fileDirectory));
     }
 
     @Test
@@ -64,10 +69,20 @@ class ClientHandlerTest {
     }
 
     @Test
-    void sendResponseToClient() {
-        PrintWriter printWriter = mock(PrintWriter.class);
+    void sendResponseToClient_invocation_writesToSocket() {
         HTTPMessage message = new HTTPMessage(HTTPStatusCodes.HTTP_OK);
         handler.sendResponseToClient(message);
-        verify(printWriter, times(1)).println(HTTPStatusCodes.HTTP_OK.toString());
+        //Verify that the stub method writer.println() was called, with any argument
+        verify(writer).println(anyString());
+    }
+
+    @Test
+    void sendResponseToClient_invocation_sendsOKFormattedMessage() {
+        //Setup the expected response format
+        String expectedClientResponse = String.format("%s\n\n", HTTPStatusCodes.HTTP_OK);
+        HTTPMessage message = new HTTPMessage(HTTPStatusCodes.HTTP_OK);
+        handler.sendResponseToClient(message);
+        //Verify that the stub method writer.println() was called with the actual argument
+        verify(writer).println(expectedClientResponse);
     }
 }
