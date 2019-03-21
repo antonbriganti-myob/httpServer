@@ -32,8 +32,8 @@ public class ClientHandler implements Runnable {
         String requestLine = getRequestLine();
         System.out.println("Request Line: " + requestLine);
 
-        Map<String, String> headers = getHeaders();
-        System.out.println("Headers: " + Arrays.toString(headers.entrySet().toArray()));
+        HTTPHeaders requestHeaders = getHeaders();
+        System.out.println("Headers: " + requestHeaders.toString());
 
         HTTPMessage response = processRequest(requestLine);
 
@@ -65,17 +65,17 @@ public class ClientHandler implements Runnable {
         return inputLine;
     }
 
-    public Map<String, String> getHeaders() {
+    public HTTPHeaders getHeaders() {
         String input;
         String key;
         String value;
-        HashMap<String, String> headers = new HashMap<>();
+        HTTPHeaders headers = new HTTPHeaders();
 
         try{
             while ((!(input=reader.readLine()).isEmpty())){
                 key = input.split(": ")[0];
                 value = input.split(": ")[1];
-                headers.put(key, value);
+                headers.addHeader(key, value);
             }
         }
         catch (IOException e){

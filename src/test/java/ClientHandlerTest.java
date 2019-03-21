@@ -9,10 +9,9 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 class ClientHandlerTest {
 
@@ -39,10 +38,10 @@ class ClientHandlerTest {
     }
 
     @Test
-    void getRequestLineDecodesRequestLineFromRequest() {
+    void getRequestLineDecodesRequestLineFromRequest() throws IOException {
         //Given
         String expectedRequestLine = "GET / HTTP/1.1";
-//        this.reader.setReadLineResponse(expectedRequestLine + "\n");
+        when(reader.readLine()).thenReturn(expectedRequestLine);
 
         //When
         String line = this.handler.getRequestLine();
@@ -52,17 +51,16 @@ class ClientHandlerTest {
     }
 
     @Test
-    void getHeadersReturnsRequestHeaders() {
+    void getHeadersReturnsRequestHeaders() throws IOException {
         //Given
-        String headers = "Header1: value1\nHeader2: value2\n\n";
-        Map<String, String> expectedHeaders = new HashMap<>();
-        expectedHeaders.put("Header1", "value1");
-        expectedHeaders.put("Header2", "value2");
-//        this.reader.setReadLineResponse(headers);
+        String[] headers = {"Header1: value1", "Header2: value2", ""};
+        HTTPHeaders expectedHeaders = new HTTPHeaders();
+        expectedHeaders.addHeader("Header1", "value1");
+        expectedHeaders.addHeader("Header2", "value2");
+        when(reader.readLine()).thenReturn(headers[0]).thenReturn(headers[1]).thenReturn(headers[2]);
 
         //When
-        Map<String, String> actualHeaders = this.handler.getHeaders();
-
+        HTTPHeaders actualHeaders = handler.getHeaders();
 
         //Then
         assertEquals(expectedHeaders, actualHeaders);
@@ -70,18 +68,28 @@ class ClientHandlerTest {
 
     @Test
     void sendResponseToClient_invocation_writesToSocket() {
+        //Given
         HTTPMessage message = new HTTPMessage(HTTPStatusCodes.HTTP_OK);
+
+        //When
         handler.sendResponseToClient(message);
+
+        //Then
         //Verify that the stub method writer.println() was called, with any argument
         verify(writer).println(anyString());
     }
 
     @Test
     void sendResponseToClient_invocation_sendsOKFormattedMessage() {
+        //Given
         //Setup the expected response format
         String expectedClientResponse = String.format("%s\n\n", HTTPStatusCodes.HTTP_OK);
         HTTPMessage message = new HTTPMessage(HTTPStatusCodes.HTTP_OK);
+
+        //When
         handler.sendResponseToClient(message);
+
+        //Then
         //Verify that the stub method writer.println() was called with the actual argument
         verify(writer).println(expectedClientResponse);
     }
