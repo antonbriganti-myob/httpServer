@@ -17,7 +17,7 @@ public class Server {
     public Server() {
     }
 
-    public void startServer(int port, String fileDir){
+    public void startServer(int port, String fileDir) throws IOException{
         if (port < 0 || port > 65535){
             System.out.println("Error, port number is out range (0-65535, inclusive)");
         }
@@ -36,25 +36,20 @@ public class Server {
             System.out.println("Failure to start server on port " + (port));
         }
 
-
         while(true){
-            try{
-                System.out.println("waiting for client");
-                Socket incomingClient = serverSocket.accept();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(incomingClient.getInputStream()));
-//                WriterPrintWriter writer = new WriterPrintWriter(incomingClient);
-                PrintWriter writer = new PrintWriter(incomingClient.getOutputStream());
-
-
-                executor.submit(new ClientHandler(writer, reader, fileDirectory));
-                System.out.println("client found");
-            }
-            catch (IOException e){
-                System.out.println("StandardSocket failed to connect");
-            }
+            System.out.println("waiting for client");
+            Socket incomingClient = serverSocket.accept();
+            acceptClient(incomingClient);
+            System.out.println("client found");
 
         }
 
+    }
+
+    private void acceptClient(Socket incomingClient) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(incomingClient.getInputStream()));
+        PrintWriter writer = new PrintWriter(incomingClient.getOutputStream());
+        executor.submit(new ClientHandler(writer, reader, fileDirectory));
     }
 
     public void closeServer() throws IOException{
