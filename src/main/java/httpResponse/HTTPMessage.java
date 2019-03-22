@@ -1,3 +1,5 @@
+package httpResponse;
+
 public class HTTPMessage {
     HTTPStatusCodes statusCode;
 //    Map<String, String> headers;

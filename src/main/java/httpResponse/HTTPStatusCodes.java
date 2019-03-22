@@ -1,3 +1,5 @@
+package httpResponse;
+
 public enum HTTPStatusCodes {
     HTTP_OK("HTTP/1.1 200 OK"),
     HTTP_NOT_FOUND("HTTP/1.1 404 NOT FOUND"),

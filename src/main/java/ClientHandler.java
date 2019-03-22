@@ -1,16 +1,22 @@
+import httpResponse.HTTPHeaders;
+import httpResponse.HTTPMessage;
+import httpResponse.HTTPMethods;
+import httpResponse.HTTPStatusCodes;
+
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ClientHandler implements Runnable {
     private PrintWriter writer;
     private BufferedReader reader;
-    private File fileDirectory;
+    private File baseDirectory;
 
     /*
     Changes the constructor to have the writer initialised outside, and injected in.
@@ -20,10 +26,10 @@ public class ClientHandler implements Runnable {
     can inject a Mock for testing, and actual implementation for Production. This is
     the same approach as the Interfaces we created previously.
      */
-    public ClientHandler(PrintWriter writer, BufferedReader reader, File fileDirectory) throws IOException {
+    public ClientHandler(PrintWriter writer, BufferedReader reader, File baseDirectory) throws IOException {
         this.writer = writer;
         this.reader = reader;
-        this.fileDirectory = fileDirectory;
+        this.baseDirectory = baseDirectory;
     }
 
     @Override
@@ -91,7 +97,7 @@ public class ClientHandler implements Runnable {
 
         HTTPMethods requestMethod = HTTPMethods.valueOf(inputLine.split(" ")[0]);
         String requestedResource = inputLine.split(" ")[1];
-        requestedFile = new File(fileDirectory, requestedResource);
+        requestedFile = new File(baseDirectory, requestedResource);
 
         switch(requestMethod){
             case HEAD:
@@ -100,10 +106,11 @@ public class ClientHandler implements Runnable {
             case GET:
                 try {
                     response = performGETRequest(requestedFile);
-                    break;
                 } catch (IOException e) {
                     e.printStackTrace();
+                    response = new HTTPMessage(HTTPStatusCodes.HTTP_INTERNAL_SERVER_ERROR);
                 }
+                break;
             default:
                 response = new HTTPMessage(HTTPStatusCodes.HTTP_NOT_IMPLEMENTED);
         }
@@ -120,19 +127,54 @@ public class ClientHandler implements Runnable {
 
     private HTTPMessage performGETRequest(File requestedFile) throws IOException {
         HTTPStatusCodes statusCode;
+        HTTPMessage response;
+
+        if(isServerRootDirectory(requestedFile)){
+            response = createGETListFileResponse(requestedFile);
+        }
+        else{
+            if (requestedFile.exists()){
+                response = createGETFileResponse(requestedFile);
+            }
+            else{
+                statusCode = HTTPStatusCodes.HTTP_NOT_FOUND;
+                response = new HTTPMessage(statusCode);
+            }
+        }
+
+
+        return response;
+    }
+
+    private boolean isServerRootDirectory(File requestedFile) {
+        return requestedFile.getPath().replace(baseDirectory.getPath(), "").equals("/");
+    }
+
+    private HTTPMessage createGETListFileResponse(File requestedFile) throws IOException {
+        HTTPStatusCodes statusCode;
+        HTTPMessage response;
+        StringBuilder body = new StringBuilder();
+
+        try (Stream<Path> paths = Files.walk(Paths.get(requestedFile.getPath()))) {
+            paths
+                    .filter(Files::isRegularFile)
+                    .map(Path::toString)
+                    .forEach(body::append);
+        }
+
+        statusCode = HTTPStatusCodes.HTTP_OK;
+        response = new HTTPMessage(statusCode, body.toString());
+        return response;
+    }
+
+    private HTTPMessage createGETFileResponse(File requestedFile) throws IOException {
+        HTTPStatusCodes statusCode;
         String fileContents;
         HTTPMessage response;
 
-        if (requestedFile.exists()){
-            statusCode = HTTPStatusCodes.HTTP_OK;
-            fileContents = new String(Files.readAllBytes(requestedFile.toPath()));
-            response = new HTTPMessage(statusCode, fileContents);
-        }
-        else{
-            statusCode = HTTPStatusCodes.HTTP_NOT_FOUND;
-            response = new HTTPMessage(statusCode);
-        }
-
+        statusCode = HTTPStatusCodes.HTTP_OK;
+        fileContents = new String(Files.readAllBytes(requestedFile.toPath()));
+        response = new HTTPMessage(statusCode, fileContents);
         return response;
     }
 

@@ -1,3 +1,6 @@
+import httpResponse.HTTPHeaders;
+import httpResponse.HTTPMessage;
+import httpResponse.HTTPStatusCodes;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -6,8 +9,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -33,7 +34,7 @@ class ClientHandlerTest {
     void setup() throws IOException {
         writer = mock(PrintWriter.class);
         reader = mock(BufferedReader.class);
-        String fileDirectory = "/Users/anton.briganti/Documents/Development/httpServerApplication/cob_spec/public";
+        String fileDirectory = "/Users/anton.briganti/Documents/Development/httpServerApplication/cob_spec/public/";
         handler = new ClientHandler(writer, reader, new File(fileDirectory));
     }
 
