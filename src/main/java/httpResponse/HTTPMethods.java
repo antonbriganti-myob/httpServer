@@ -2,5 +2,8 @@ package httpResponse;
 
 public enum HTTPMethods {
     HEAD,
-    GET;
+    GET,
+    OPTIONS,
+    PUT,
+    DELETE
 }

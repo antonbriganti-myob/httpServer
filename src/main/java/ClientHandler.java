@@ -10,7 +10,6 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ClientHandler implements Runnable {
@@ -92,44 +91,53 @@ public class ClientHandler implements Runnable {
     }
 
     private HTTPMessage processRequest(String inputLine) {
-        File requestedFile;
         HTTPMessage response;
 
         HTTPMethods requestMethod = HTTPMethods.valueOf(inputLine.split(" ")[0]);
         String requestedResource = inputLine.split(" ")[1];
-        requestedFile = new File(baseDirectory, requestedResource);
 
         switch(requestMethod){
             case HEAD:
-                response = performHEADRequest(requestedFile);
+                response = performHEADRequest(requestedResource);
                 break;
             case GET:
                 try {
-                    response = performGETRequest(requestedFile);
+                    response = performGETRequest(requestedResource);
                 } catch (IOException e) {
                     e.printStackTrace();
                     response = new HTTPMessage(HTTPStatusCodes.HTTP_INTERNAL_SERVER_ERROR);
                 }
                 break;
+            case PUT:
+                response = performPUTRequest();
+                break;
+            case DELETE:
+                response = performDELETERequest();
+                break;
+            case OPTIONS:
+                response = performOPTIONSRequest();
+                break;
             default:
-                response = new HTTPMessage(HTTPStatusCodes.HTTP_NOT_IMPLEMENTED);
+                response = new HTTPMessage(HTTPStatusCodes.HTTP_NOT_ALLOWED);
         }
 
 
         return response;
     }
 
-    private HTTPMessage performHEADRequest(File requestedFile) {
+    private HTTPMessage performHEADRequest(String requestedResource) {
         HTTPStatusCodes statusCode;
+        File requestedFile = new File(baseDirectory, requestedResource);
         statusCode =  (requestedFile.exists()) ? HTTPStatusCodes.HTTP_OK : HTTPStatusCodes.HTTP_NOT_FOUND;
         return new HTTPMessage(statusCode);
     }
 
-    private HTTPMessage performGETRequest(File requestedFile) throws IOException {
+    private HTTPMessage performGETRequest(String requestedResource) throws IOException {
         HTTPStatusCodes statusCode;
         HTTPMessage response;
+        File requestedFile = new File(baseDirectory, requestedResource);
 
-        if(isServerRootDirectory(requestedFile)){
+        if(isServerRootDirectory(requestedResource)){
             response = createGETListFileResponse(requestedFile);
         }
         else{
@@ -146,8 +154,29 @@ public class ClientHandler implements Runnable {
         return response;
     }
 
-    private boolean isServerRootDirectory(File requestedFile) {
-        return requestedFile.getPath().replace(baseDirectory.getPath(), "").equals("/");
+    private HTTPMessage performOPTIONSRequest() {
+        HTTPMessage response;
+        response = new HTTPMessage(HTTPStatusCodes.HTTP_NOT_IMPLEMENTED);
+        return response;
+    }
+
+    private HTTPMessage performDELETERequest() {
+        HTTPMessage response;
+        response = new HTTPMessage(HTTPStatusCodes.HTTP_NOT_IMPLEMENTED);
+        return response;
+    }
+
+
+    private HTTPMessage performPUTRequest() {
+        HTTPMessage response;
+        response = new HTTPMessage(HTTPStatusCodes.HTTP_NOT_IMPLEMENTED);
+        return response;
+    }
+
+
+
+    private boolean isServerRootDirectory(String requestedResource) {
+        return "/".equals(requestedResource);
     }
 
     private HTTPMessage createGETListFileResponse(File requestedFile) throws IOException {
