@@ -20,7 +20,6 @@ public class HTTPHeaders{
         for(String key:headers.keySet()){
             result.append(key).append(": ").append(headers.get(key)).append("\n");
         }
-        result.deleteCharAt(result.length()-1);
         return result.toString();
     }
 

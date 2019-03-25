@@ -84,8 +84,13 @@ class ClientHandlerTest {
     void sendResponseToClient_invocation_sendsOKFormattedMessage() {
         //Given
         //Setup the expected response format
-        String expectedClientResponse = String.format("%s\n\n", HTTPStatusCodes.HTTP_OK);
-        HTTPMessage message = new HTTPMessage(HTTPStatusCodes.HTTP_OK);
+        HTTPStatusCodes sampleStatus = HTTPStatusCodes.HTTP_OK;
+        HTTPHeaders sampleHeaders = new HTTPHeaders();
+        sampleHeaders.addHeader("Header1", "value1");
+        sampleHeaders.addHeader("Header2", "value2");
+        String body = "testbody";
+        String expectedClientResponse = String.format("%s\n%s\n%s", HTTPStatusCodes.HTTP_OK, sampleHeaders.toString(), body);
+        HTTPMessage message = new HTTPMessage(HTTPStatusCodes.HTTP_OK, sampleHeaders, body);
 
         //When
         handler.sendResponseToClient(message);
