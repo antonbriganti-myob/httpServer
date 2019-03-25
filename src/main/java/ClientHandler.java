@@ -115,7 +115,7 @@ public class ClientHandler implements Runnable {
                 response = performDELETERequest();
                 break;
             case OPTIONS:
-                response = performOPTIONSRequest();
+                response = performOPTIONSRequest(requestedResource);
                 break;
             default:
                 response = new HTTPMessage(HTTPStatusCodes.HTTP_NOT_ALLOWED);
@@ -154,10 +154,31 @@ public class ClientHandler implements Runnable {
         return response;
     }
 
-    private HTTPMessage performOPTIONSRequest() {
+    private HTTPMessage performOPTIONSRequest(String requestedResource) {
         HTTPMessage response;
-        response = new HTTPMessage(HTTPStatusCodes.HTTP_NOT_IMPLEMENTED);
+        HTTPStatusCodes responseCode = HTTPStatusCodes.HTTP_OK;
+        HTTPHeaders headers = buildHeadersForOPTIONSRequest(requestedResource);
+
+        response = new HTTPMessage(responseCode, headers);
         return response;
+    }
+
+    private HTTPHeaders buildHeadersForOPTIONSRequest(String requestedResource) {
+        HTTPHeaders headers = new HTTPHeaders();
+
+        StringBuilder allowedMethods = new StringBuilder();
+        allowedMethods.append(HTTPMethods.GET).append(",");
+        allowedMethods.append(HTTPMethods.HEAD).append(",");
+        allowedMethods.append(HTTPMethods.OPTIONS);
+
+        if(!(requestedResource.equals("/logs"))){
+            allowedMethods.append(",");
+            allowedMethods.append(HTTPMethods.PUT).append(",");
+            allowedMethods.append(HTTPMethods.DELETE);
+        }
+
+        headers.addHeader("Allow", allowedMethods.toString());
+        return headers;
     }
 
     private HTTPMessage performDELETERequest() {
@@ -176,7 +197,7 @@ public class ClientHandler implements Runnable {
 
 
     private boolean isServerRootDirectory(String requestedResource) {
-        return "/".equals(requestedResource);
+        return requestedResource.equals("/");
     }
 
     private HTTPMessage createGETListFileResponse(File requestedFile) throws IOException {
