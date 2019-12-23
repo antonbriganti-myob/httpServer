@@ -55,6 +55,7 @@ public class ClientHandler implements Runnable {
 
     public void sendResponseToClient(HTTPMessage response) {
         writer.println(response.toString());
+        writer.flush();
     }
 
     public String getRequestLine() {
@@ -91,11 +92,17 @@ public class ClientHandler implements Runnable {
     }
 
     private HTTPMessage processRequest(String inputLine) {
-        HTTPMessage response;
+        HTTPMethods requestMethod;
 
-        HTTPMethods requestMethod = HTTPMethods.valueOf(inputLine.split(" ")[0]);
         String requestedResource = inputLine.split(" ")[1];
 
+        try {
+            requestMethod = HTTPMethods.valueOf(inputLine.split(" ")[0]);
+        } catch (IllegalArgumentException e) {
+            return new HTTPMessage(HTTPStatusCodes.HTTP_NOT_IMPLEMENTED);
+        }
+
+        HTTPMessage response;
         switch(requestMethod){
             case HEAD:
                 response = performHEADRequest(requestedResource);
